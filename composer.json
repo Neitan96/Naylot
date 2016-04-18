@@ -1,0 +1,12 @@
+{
+  "name": "nathanalmeida/naylot",
+  "description": "PHP ORM simple and easy",
+  "type": "library",
+  "license": "GNU 3",
+  "authors": [
+    {
+      "name": "Nathan Almeida",
+      "email": "nathanalmeidadev@outlook.com"
+    }
+  ]
+}
