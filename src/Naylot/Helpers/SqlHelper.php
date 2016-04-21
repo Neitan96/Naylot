@@ -60,4 +60,14 @@ class SqlHelper{
         }
     }
 
+    public static function compileComp($value, &$binds){
+        if($value instanceof \Closure)
+            $value = $value($binds);
+
+        if($value instanceof SqlComponent)
+            $value = $value->compileSql($binds);
+
+        return $value;
+    }
+
 }

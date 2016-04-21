@@ -7,16 +7,15 @@
 namespace Naylot\Components;
 
 
-class SqlValue{
+class SqlFun implements SqlComponent{
 
-    /**
-     * @var mixed
-     */
+    /** @var mixed */
     protected $value;
 
-    /**
-     * @var int
-     */
+    /** @var bool */
+    protected $isColumn = true;
+
+    /** @var int */
     protected $data_type = null;
 
     /**
@@ -31,26 +30,28 @@ class SqlValue{
     /**
      * SqlFun constructor.
      * @param mixed $value
+     * @param bool $isColumn
      * @param int $data_type
      */
-    public function __construct($value, $data_type = null){
+    public function __construct($value, $isColumn = true, $data_type = null){
         $this->value = $value;
+        $this->isColumn = $isColumn;
         $this->data_type = $data_type;
     }
 
 
     /**
      * @param mixed $value
+     * @param bool $isColumn
      * @param int $data_type
-     * @return SqlValue|SqlComponent
+     * @return SqlFun
      */
-    public static function make($value, $data_type = null){
-        if(!$value instanceof SqlComponent)
-            return new SqlValue($value, $data_type);
-        else
+    public static function make($value, $isColumn = true, $data_type = null){
+        if($value instanceof SqlFun)
             return $value;
+        else
+            return new SqlFun($value, $isColumn, $data_type);
     }
-
 
     public function avg(){
         $this->addFunction('AVG(');
@@ -130,22 +131,20 @@ class SqlValue{
     public function compileSql(&$binds = null){
         if(!$this->isValid()) return null;
 
-        $value = $this->value;
-        if($value instanceof \Closure){
-            $sqlFunctions = $value($binds);
-        }elseif($value instanceof SqlComponent){
-            $sqlFunctions = $value->compileSql($binds);
-        }else{
+        $value = SqlHelper::compileComp($this->value, $binds);
+
+        if(!$this->isColumn)
             if(!is_null($this->data_type))
-                $sqlFunctions = $binds->bindValue($value, $this->data_type);
+                $value = $binds->bindValue($value, $this->data_type);
             else
-                $sqlFunctions = $binds->bindValue($value);
-        }
+                $value = $binds->bindValue($value);
+        else
+            $value = SqlHelper::processRef($value);
 
         foreach($this->functions as $function)
-            $sqlFunctions = $function[0].$sqlFunctions.SqlHelper::array_element(1, $function);
+            $value = $function[0].$value.SqlHelper::array_element(1, $function);
 
-        return $sqlFunctions;
+        return $value;
     }
 
     /**
