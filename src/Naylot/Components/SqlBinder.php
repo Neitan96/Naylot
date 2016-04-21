@@ -7,6 +7,7 @@
 namespace Naylot\Components;
 
 
+use Naylot\Helpers\ClassCallsStorage;
 use PDO;
 
 class SqlBinder{

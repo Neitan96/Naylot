@@ -4,7 +4,7 @@
  * Since: 15/04/2016 14:16
  */
 
-namespace Naylot\Components;
+namespace Naylot\Helpers;
 
 
 class ClassCallsStorage{
