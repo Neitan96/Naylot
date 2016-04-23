@@ -5,7 +5,7 @@ Naylot é um ORM feito em PHP. Criado para ser simples e fácil, com ele você p
 ## Instalação
 
 ```sh
-composer require nathanalmeida/naylot
+composer require neitan96/naylot
 ```
 
 ## Estrutura
