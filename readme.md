@@ -1,6 +1,6 @@
 # Naylot
 
-Naylot é um ORM feito em PHP. Criado para ser simples e fácil, com ele você pode rapidamente criar relações de objectos com banco de dados rapidamente.
+Naylot é um ORM feito em PHP. Criado para ser simples e fácil, com ele você pode rapidamente criar relações de objetos com banco de dados.
 
 ## Instalação
 
