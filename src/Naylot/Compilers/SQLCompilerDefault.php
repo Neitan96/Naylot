@@ -96,14 +96,6 @@ class SQLCompilerDefault implements SQLCompiler{
             return null;
     }
 
-    public function whereWhere(array $where, $compilePrefix = true){
-        $sql = $this->getStartWhere($where, $compilePrefix);
-        $sql .= $this->compileRef($where['Value1']).' ';
-        $sql .= $where['Comparator'].' ';
-        $sql .= $this->compileValue($where['Value2']);
-        return $sql;
-    }
-
     protected function getStartWhere($where, $compilePrefix = true){
         if($compilePrefix && key_exists('Prefix', $where))
             return $where['Prefix'].' ';
@@ -111,51 +103,12 @@ class SQLCompilerDefault implements SQLCompiler{
             return '';
     }
 
-    /**
-     * @param \Closure|SqlComponent|array|string $value
-     * @return string|array
-     */
-    protected function compileRef($value){
-        if(is_array($value)){
-            foreach($value as $key => $v)
-                $value[$key] = $this->compileRef($v);
-            return implode(', ', $value);
-        }
-
-        if($value instanceof \Closure)
-            return $value($this->binds);
-
-        if($value instanceof SqlComponent)
-            return $value->compileSql($this->binds);
-
-        if(!is_null($value)){
-            $value = str_replace('`', '', $value);
-            $value = str_replace('.', '`.`', $value);
-            return "`{$value}`";
-        }
-
-        return 'NULL';
-    }
-
-    /**
-     * @param \Closure|SqlComponent|array|mixed $value
-     * @param int $data_type
-     * @return string
-     */
-    protected function compileValue($value, $data_type = \PDO::PARAM_STR){
-        if(is_array($value)){
-            foreach($value as $key => $v)
-                $value[$key] = $this->compileValue($v, $data_type);
-            return implode(', ', $value);
-        }
-
-        if($value instanceof \Closure)
-            return $value($this->binds, $data_type);
-
-        if($value instanceof SqlComponent)
-            return $value->compileSql($this->binds);
-
-        return $this->binds->bindValue($value, $data_type);
+    public function whereWhere(array $where, $compilePrefix = true){
+        $sql = $this->getStartWhere($where, $compilePrefix);
+        $sql .= $this->compileRef($where['Value1']).' ';
+        $sql .= $where['Comparator'].' ';
+        $sql .= $this->compileValue($where['Value2']);
+        return $sql;
     }
 
     public function whereBetween(array $where, $compilePrefix = true){
@@ -229,7 +182,12 @@ class SQLCompilerDefault implements SQLCompiler{
      * @return string
      */
     public function groupBy(array $refereces){
-        // TODO: Implement groupBy() method.
+        foreach($refereces as $key => $referece){
+            $referece = is_array($referece) || $referece = array('Reference' => $referece);
+            $referece['Reference'] = $this->compileRef($referece['Reference']);
+            $refereces[$key] = $referece;
+        }
+        return 'GROUP BY '.implode(', ', $refereces);
     }
 
     /**
@@ -238,17 +196,98 @@ class SQLCompilerDefault implements SQLCompiler{
      * @return string
      */
     public function limit(array $limit){
-        // TODO: Implement limit() method.
+        $take = $limit['Take'];
+        $skip = $limit['Skip'];
+        if(!is_null($take)) $take = 'LIMIT '.$take;
+        if(!is_null($skip)) $skip = 'OFFSET '.$skip;
+        return $take.(!is_null($take) && !is_null($take) ? ' ' : null).$skip;
     }
 
     /**
      * @param array $options
      * [
-     *  ['Key' => 'Value']
+     *  ['Key', 'Value']
      * ]
      * @return string
      */
     public function tableOptions($options){
-        // TODO: Implement tableOptions() method.
+        $tableOptionsSql = null;
+        foreach($options as $option){
+            is_null($tableOptionsSql) || $tableOptionsSql .= ' ';
+            $methodName = 'tableOption'.$option['Key'];
+            if(method_exists($this, $methodName)){
+                $return = call_user_func(array($this, $methodName), $option);
+                if(!is_null($return)) $tableOptionsSql .= ' '.$return;
+            }else{
+                $tableOptionsSql .= ' '.$option['Key'].(
+                    key_exists('Value', $option) && !is_null($option['Value']) ?
+                        ' = '.$option['Value'] : null
+                    );
+            }
+        }
     }
+
+    public function tableOptionAutoincrement(array $option){
+        return 'AUTO_INCREMENT = '.(int)$option['Value'];
+    }
+
+    public function tableOptionEngine(array $option){
+        return 'ENGINE = '.$option['Value'];
+    }
+
+    public function tableOptionCharset(array $option){
+        return 'CHARSET = '.$option['Value'];
+    }
+
+    public function tableOptionCollate(array $option){
+        return 'COLLATE = '.$option['Value'];
+    }
+
+    /**
+     * @param \Closure|SqlComponent|array|string $value
+     * @return string|array
+     */
+    protected function compileRef($value){
+        if(is_array($value)){
+            foreach($value as $key => $v)
+                $value[$key] = $this->compileRef($v);
+            return implode(', ', $value);
+        }
+
+        if($value instanceof \Closure)
+            return $value($this->binds);
+
+        if($value instanceof SqlComponent)
+            return $value->compileSql($this->binds);
+
+        if(!is_null($value)){
+            $value = str_replace('`', '', $value);
+            $value = str_replace('.', '`.`', $value);
+            return "`{$value}`";
+        }
+
+        return 'NULL';
+    }
+
+    /**
+     * @param \Closure|SqlComponent|array|mixed $value
+     * @param int $data_type
+     * @return string
+     */
+    protected function compileValue($value, $data_type = \PDO::PARAM_STR){
+        if(is_array($value)){
+            foreach($value as $key => $v)
+                $value[$key] = $this->compileValue($v, $data_type);
+            return implode(', ', $value);
+        }
+
+        if($value instanceof \Closure)
+            return $value($this->binds, $data_type);
+
+        if($value instanceof SqlComponent)
+            return $value->compileSql($this->binds);
+
+        return $this->binds->bindValue($value, $data_type);
+    }
+
 }

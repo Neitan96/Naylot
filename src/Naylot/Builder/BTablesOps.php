@@ -13,14 +13,6 @@ trait BTablesOps{
     protected $options = array();
 
     /**
-     * @param int $id
-     * @return $this
-     */
-    public function autoIncrement($id){
-        return $this->tableOption('AUTOINCREMENT', $id);
-    }
-
-    /**
      * @param string $key
      * @param mixed $value
      * @return $this
@@ -31,11 +23,19 @@ trait BTablesOps{
     }
 
     /**
+     * @param int $id
+     * @return $this
+     */
+    public function autoIncrement($id){
+        return $this->tableOption('Autoincrement', $id);
+    }
+
+    /**
      * @param string $engine
      * @return $this
      */
     public function engine($engine){
-        return $this->tableOption('ENGINE', $engine);
+        return $this->tableOption('Engine', $engine);
     }
 
     /**
@@ -43,7 +43,7 @@ trait BTablesOps{
      * @return $this
      */
     public function charset($charset){
-        return $this->tableOption('CHARSET', $charset);
+        return $this->tableOption('Charset', $charset);
     }
 
     /**
@@ -51,7 +51,7 @@ trait BTablesOps{
      * @return $this
      */
     public function collate($collate){
-        return $this->tableOption('COLLATE', $collate);
+        return $this->tableOption('Collate', $collate);
     }
 
 }
