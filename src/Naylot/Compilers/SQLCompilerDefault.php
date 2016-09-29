@@ -225,6 +225,7 @@ class SQLCompilerDefault implements SQLCompiler{
                     );
             }
         }
+        return $tableOptionsSql;
     }
 
     public function tableOptionAutoincrement(array $option){
