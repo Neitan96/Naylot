@@ -7,7 +7,7 @@
 namespace Naylot\Compilers;
 
 
-interface SQLCompiler{
+interface SqlCompiler{
 
     /**
      * @param array $foreignkey

@@ -7,6 +7,8 @@
 namespace Naylot\Components;
 
 
+use Naylot\Compilers\SqlCompilerDefault;
+
 class SqlColSelect implements SqlComponent{
 
     /**
@@ -56,8 +58,8 @@ class SqlColSelect implements SqlComponent{
     public function compileSql(&$binds = null){
         if(!$this->isValid()) return null;
 
-        $value = SqlHelper::compileComp($this->column, $binds);
-        $value = SqlHelper::processRef($value);
+        $value = SqlCompilerDefault::compileComponent($this->column, $binds);
+        $value = SqlCompilerDefault::compileRef($value);
         $value = implode(', ', SqlHelper::toArray($value));
 
         $mods = $this->mods;

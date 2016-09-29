@@ -9,9 +9,74 @@ namespace Naylot\Compilers;
 
 use Naylot\Components\SqlBinder;
 use Naylot\Components\SqlComponent;
-use Naylot\Components\SqlHelper;
 
-class SQLCompilerDefault implements SQLCompiler{
+class SqlCompilerDefault implements SqlCompiler{
+
+
+    /**
+     * @param \Closure|SqlComponent|array|string $component
+     * @param SqlBinder $binds
+     * @return string|array
+     */
+    public static function compileComponent($component, &$binds = null){
+        if($component instanceof \Closure)
+            $component = $component($binds);
+
+        if($component instanceof SqlComponent)
+            $component = $component->compileSql($binds);
+
+        return $component;
+    }
+
+    /**
+     * @param \Closure|SqlComponent|array|string $value
+     * @param SqlBinder $binds
+     * @return string|array
+     */
+    public static function compileRef($value, &$binds = null){
+        if(is_array($value)){
+            foreach($value as $key => $v)
+                $value[$key] = static::compileRef($v);
+            return implode(', ', $value);
+        }
+
+        if($value instanceof \Closure)
+            return $value($binds);
+
+        if($value instanceof SqlComponent)
+            return $value->compileSql($binds);
+
+        if(!is_null($value)){
+            $value = str_replace('`', '', $value);
+            $value = str_replace('.', '`.`', $value);
+            return "`{$value}`";
+        }
+
+        return 'NULL';
+    }
+
+    /**
+     * @param \Closure|SqlComponent|array|mixed $value
+     * @param SqlBinder $binds
+     * @param int $data_type
+     * @return string
+     */
+    public static function compileValue($value, &$binds = null, $data_type = \PDO::PARAM_STR){
+        if(is_array($value)){
+            foreach($value as $key => $v)
+                $value[$key] = static::compileValue($v, $data_type);
+            return implode(', ', $value);
+        }
+
+        if($value instanceof \Closure)
+            return $value($binds, $data_type);
+
+        if($value instanceof SqlComponent)
+            return $value->compileSql($binds);
+
+        return $binds->bindValue($value, $data_type);
+    }
+
 
     /** @var SqlBinder */
     protected $binds;
@@ -40,10 +105,10 @@ class SQLCompilerDefault implements SQLCompiler{
      * @return string
      */
     public function foreignkeyToAdd(array $foreignkey){
-        $foreignkeySQL = 'CONSTRAINT '.SqlHelper::processRef($foreignkey['Name']);
-        $foreignkeySQL .= ' FOREIGN KEY ('.SqlHelper::processRef($foreignkey['ColumnLocal']).')';
-        $foreignkeySQL .= ' REFERENCES '.SqlHelper::processRef($foreignkey['TableRef']);
-        $foreignkeySQL .= '('.SqlHelper::processRef($foreignkey['ColumnRef']).')';
+        $foreignkeySQL = 'CONSTRAINT '.$this->compileRef($foreignkey['Name']);
+        $foreignkeySQL .= ' FOREIGN KEY ('.$this->compileRef($foreignkey['ColumnLocal']).')';
+        $foreignkeySQL .= ' REFERENCES '.$this->compileRef($foreignkey['TableRef']);
+        $foreignkeySQL .= '('.$this->compileRef($foreignkey['ColumnRef']).')';
 
         if(key_exists('OnDelete', $foreignkey))
             $foreignkeySQL .= ' ON DELETE '.$foreignkey['OnDelete'];
@@ -68,7 +133,7 @@ class SQLCompilerDefault implements SQLCompiler{
      * @return string
      */
     public function foreignkeyToDrop($name){
-        return 'DROP CONSTRAINT '.SqlHelper::processRef($name);
+        return 'DROP CONSTRAINT '.$this->compileRef($name);
     }
 
     /**
@@ -245,29 +310,19 @@ class SQLCompilerDefault implements SQLCompiler{
     }
 
     /**
+     * @param \Closure|SqlComponent|array|string $component
+     * @return string|array
+     */
+    protected function compileMycomponent($component){
+        return static::compileComponent($component, $this->binds);
+    }
+
+    /**
      * @param \Closure|SqlComponent|array|string $value
      * @return string|array
      */
-    protected function compileRef($value){
-        if(is_array($value)){
-            foreach($value as $key => $v)
-                $value[$key] = $this->compileRef($v);
-            return implode(', ', $value);
-        }
-
-        if($value instanceof \Closure)
-            return $value($this->binds);
-
-        if($value instanceof SqlComponent)
-            return $value->compileSql($this->binds);
-
-        if(!is_null($value)){
-            $value = str_replace('`', '', $value);
-            $value = str_replace('.', '`.`', $value);
-            return "`{$value}`";
-        }
-
-        return 'NULL';
+    protected function compileMyRef($value){
+        return static::compileRef($value, $this->binds);
     }
 
     /**
@@ -275,20 +330,8 @@ class SQLCompilerDefault implements SQLCompiler{
      * @param int $data_type
      * @return string
      */
-    protected function compileValue($value, $data_type = \PDO::PARAM_STR){
-        if(is_array($value)){
-            foreach($value as $key => $v)
-                $value[$key] = $this->compileValue($v, $data_type);
-            return implode(', ', $value);
-        }
-
-        if($value instanceof \Closure)
-            return $value($this->binds, $data_type);
-
-        if($value instanceof SqlComponent)
-            return $value->compileSql($this->binds);
-
-        return $this->binds->bindValue($value, $data_type);
+    protected function compileMyValue($value, $data_type = \PDO::PARAM_STR){
+        return static::compileValue($value, $this->binds, $data_type);
     }
 
 }

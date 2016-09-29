@@ -7,6 +7,8 @@
 namespace Naylot\Components;
 
 
+use Naylot\Compilers\SqlCompilerDefault;
+
 class SqlFun implements SqlComponent{
 
     /** @var mixed */
@@ -120,7 +122,7 @@ class SqlFun implements SqlComponent{
     }
 
     public function format($format){
-        $this->addFunction('FORMAT(', SqlHelper::processValue($format).')');
+        $this->addFunction('FORMAT(', SqlCompilerDefault::compileValue($format).')');
         return $this;
     }
 
@@ -131,7 +133,7 @@ class SqlFun implements SqlComponent{
     public function compileSql(&$binds = null){
         if(!$this->isValid()) return null;
 
-        $value = SqlHelper::compileComp($this->value, $binds);
+        $value = SqlCompilerDefault::compileComponent($this->value, $binds);
 
         if(!$this->isColumn)
             if(!is_null($this->data_type))
@@ -139,7 +141,7 @@ class SqlFun implements SqlComponent{
             else
                 $value = $binds->bindValue($value);
         else
-            $value = SqlHelper::processRef($value);
+            $value = SqlCompilerDefault::compileRef($value);
 
         foreach($this->functions as $function)
             $value = $function[0].$value.SqlHelper::array_element(1, $function);
