@@ -248,11 +248,26 @@ class SqlCompilerDefault implements SqlCompiler{
      */
     public function groupBy(array $refereces){
         foreach($refereces as $key => $referece){
-            $referece = is_array($referece) || $referece = array('Reference' => $referece);
+            is_array($referece) || $referece = array('Reference' => $referece);
             $referece['Reference'] = $this->compileRef($referece['Reference']);
             $refereces[$key] = $referece;
         }
         return 'GROUP BY '.implode(', ', $refereces);
+    }
+
+    /**
+     * @param array|string $refereces
+     * [
+     *  ['Reference', 'Order']
+     * ]
+     * @return string
+     */
+    public function orderBy(array $refereces){
+        foreach($refereces as $key => $referece){
+            is_array($referece) || array($referece);
+            $referece[$key] = $this->compileRef($referece['Reference']) . ' ' . $referece['Order'];
+        }
+        return 'ORDER BY ' . implode(', ', $refereces);
     }
 
     /**
