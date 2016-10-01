@@ -9,7 +9,7 @@ namespace Naylot\Components;
 
 use Naylot\Compilers\SqlCompilerDefault;
 
-class SqlFun implements SqlComponent{
+class SqlFunc implements SqlComponent{
 
     /** @var mixed */
     protected $value;
@@ -46,13 +46,13 @@ class SqlFun implements SqlComponent{
      * @param mixed $value
      * @param bool $isColumn
      * @param int $data_type
-     * @return SqlFun
+     * @return SqlFunc
      */
     public static function make($value, $isColumn = true, $data_type = null){
-        if($value instanceof SqlFun)
+        if($value instanceof SqlFunc)
             return $value;
         else
-            return new SqlFun($value, $isColumn, $data_type);
+            return new SqlFunc($value, $isColumn, $data_type);
     }
 
     public function avg(){

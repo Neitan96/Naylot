@@ -27,6 +27,14 @@ class SqlSubQuery implements SqlComponent{
 
 
     /**
+     * @param string $query
+     * @return SqlSubQuery
+     */
+    public static function make($query){
+        return new SqlSubQuery($query);
+    }
+
+    /**
      * @param SqlBinder $binds
      * @return string|null
      */
