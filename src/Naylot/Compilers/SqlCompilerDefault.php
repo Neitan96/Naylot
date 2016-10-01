@@ -240,6 +240,38 @@ class SqlCompilerDefault implements SqlCompiler{
     }
 
     /**
+     * @param array $join
+     * ['Type', 'LocalRef', 'TableRef', 'ColumnRef']
+     * @param string $tableName
+     * @return string
+     */
+    public function join(array $join, $tableName = null){
+        $tableRef = $this->compileMyRef($join['TableRef']);
+        $joinSql = $join['Type'].' JOIN '.$tableRef;
+        if(isset($join['LocalRef']) && isset($join['LocalRef'])){
+            $localRef = $this->compileMyRef($join['LocalRef']);
+            $columnRef = $this->compileMyRef($join['ColumnRef']);
+            strpos($localRef, '.') === false && $this->compileMyRef($tableName).$localRef;
+            $joinSql .= $localRef.'='.$tableRef.'.'.$columnRef;
+        }
+        return $joinSql;
+    }
+
+    /**
+     * @param array $joins
+     * [
+     *  ['Type', 'LocalRef', 'TableRef', 'ColumnRef']
+     * ]
+     * @param string $tableName
+     * @return string
+     */
+    public function joins(array $joins, $tableName){
+        foreach($joins as $key => $join)
+            $joins[$key] = $this->join($join, $tableName);
+        return implode(' ', $joins);
+    }
+
+    /**
      * @param array|string $refereces
      * [
      *  ['Reference', ...]

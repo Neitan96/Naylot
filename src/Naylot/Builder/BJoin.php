@@ -19,9 +19,12 @@ trait BJoin{
      * @param string $columnRef
      * @return $this
      */
-    public function innerJoin($tableRef, $localRef, $columnRef){
+    public function innerJoin($localRef, $tableRef, $columnRef){
         $this->joins[] = array(
-            'INNER', $tableRef, $localRef, $columnRef
+            'Type' => 'INNER',
+            'LocalRef' => $localRef,
+            'TableRef' => $tableRef,
+            'ColumnRef' => $columnRef
         );
         return $this;
     }
@@ -32,9 +35,12 @@ trait BJoin{
      * @param string $columnRef
      * @return $this
      */
-    public function leftJoin($tableRef, $localRef, $columnRef){
+    public function leftJoin($localRef, $tableRef, $columnRef){
         $this->joins[] = array(
-            'LEFT', $tableRef, $localRef, $columnRef
+            'Type' => 'LEFT',
+            'LocalRef' => $localRef,
+            'TableRef' => $tableRef,
+            'ColumnRef' => $columnRef
         );
         return $this;
     }
@@ -45,9 +51,12 @@ trait BJoin{
      * @param string $columnRef
      * @return $this
      */
-    public function rightJoin($tableRef, $localRef, $columnRef){
+    public function rightJoin($localRef, $tableRef, $columnRef){
         $this->joins[] = array(
-            'RIGHT', $tableRef, $localRef, $columnRef
+            'Type' => 'RIGHT',
+            'LocalRef' => $localRef,
+            'TableRef' => $tableRef,
+            'ColumnRef' => $columnRef
         );
         return $this;
     }
@@ -58,9 +67,24 @@ trait BJoin{
      * @param string $columnRef
      * @return $this
      */
-    public function fullJoin($tableRef, $localRef, $columnRef){
+    public function fullJoin($localRef, $tableRef, $columnRef){
         $this->joins[] = array(
-            'FULL', $tableRef, $localRef, $columnRef
+            'Type' => 'FULL',
+            'LocalRef' => $localRef,
+            'TableRef' => $tableRef,
+            'ColumnRef' => $columnRef
+        );
+        return $this;
+    }
+
+    /**
+     * @param string $tableRef
+     * @return $this
+     */
+    public function crossJoin($tableRef){
+        $this->joins[] = array(
+            'Type' => 'CROSS',
+            'TableRef' => $tableRef,
         );
         return $this;
     }
