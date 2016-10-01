@@ -58,8 +58,7 @@ class SqlColSelect implements SqlComponent{
     public function compileSql(&$binds = null){
         if(!$this->isValid()) return null;
 
-        $value = SqlCompilerDefault::compileComponent($this->column, $binds);
-        $value = SqlCompilerDefault::compileRef($value);
+        $value = SqlCompilerDefault::compileRef($this->column, $binds);
         $value = implode(', ', SqlHelper::toArray($value));
 
         $mods = $this->mods;

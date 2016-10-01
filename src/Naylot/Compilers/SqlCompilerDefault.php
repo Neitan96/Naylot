@@ -19,12 +19,15 @@ class SqlCompilerDefault implements SqlCompiler{
      * @return string|array
      */
     public static function compileComponent($component, &$binds = null){
-        if($component instanceof \Closure)
-            $component = $component($binds);
+        while($component instanceof \Closure || $component instanceof SqlComponent){
 
-        if($component instanceof SqlComponent)
-            $component = $component->compileSql($binds);
+            if($component instanceof \Closure)
+                $component = $component($binds);
 
+            if($component instanceof SqlComponent)
+                $component = $component->compileSql($binds);
+
+        }
         return $component;
     }
 
@@ -40,11 +43,8 @@ class SqlCompilerDefault implements SqlCompiler{
             return implode(', ', $value);
         }
 
-        if($value instanceof \Closure)
-            return $value($binds);
-
-        if($value instanceof SqlComponent)
-            return $value->compileSql($binds);
+        if($value instanceof \Closure || $value instanceof SqlComponent)
+            return static::compileComponent($value, $binds);
 
         if(!is_null($value)){
             $value = str_replace('`', '', $value);
