@@ -25,6 +25,7 @@ trait BOrderBy{
     /**
      * @param SqlComponent|array|string $columns
      * @param string $order
+     * @return $this
      */
     protected function orderBy($columns, $order = 'ASC'){
         if(is_array($columns)){
@@ -32,20 +33,24 @@ trait BOrderBy{
                 $this->orderBy($column, $order);
         }else
             $this->columns[] = ['Reference' => $columns, 'Order' => $order];
+
+        return $this;
     }
 
     /**
      * @param SqlComponent|array|string $columns
+     * @return $this
      */
     public function orderByAsc($columns){
-        $this->orderBy($columns, 'ASC');
+        return $this->orderBy($columns, 'ASC');
     }
 
     /**
      * @param SqlComponent|array|string $columns
+     * @return $this
      */
     public function orderByDesc($columns){
-        $this->orderBy($columns, 'DESC');
+        return $this->orderBy($columns, 'DESC');
     }
 
 }
