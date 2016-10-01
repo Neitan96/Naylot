@@ -265,7 +265,7 @@ class SqlCompilerDefault implements SqlCompiler{
      * @param string $tableName
      * @return string
      */
-    public function joins(array $joins, $tableName){
+    public function joins(array $joins, $tableName = null){
         foreach($joins as $key => $join)
             $joins[$key] = $this->join($join, $tableName);
         return implode(' ', $joins);
@@ -313,6 +313,35 @@ class SqlCompilerDefault implements SqlCompiler{
         if(!is_null($take)) $take = 'LIMIT '.$take;
         if(!is_null($skip)) $skip = 'OFFSET '.$skip;
         return $take.(!is_null($take) && !is_null($take) ? ' ' : null).$skip;
+    }
+
+    /**
+     * @param array|string $union
+     * ['Type', 'Union']
+     * 'Union'
+     * @return string
+     */
+    public function union($union){
+        if(is_array($union)){
+            return 'UNION '.(isset($union['Type']) ? $union['Type'].' ' : '')
+            .$this->compileMycomponent($union['Union']);
+        }else{
+            return 'UNION '.$this->compileMycomponent($union);
+        }
+    }
+
+    /**
+     * @param array|string $unions
+     * [
+     *  ['Type', 'Union']
+     *  'Union'
+     * ]
+     * @return string
+     */
+    public function unions($unions){
+        foreach($unions as $key => $union)
+            $unions[$key] = $this->union($union);
+        return implode(' ', $unions);
     }
 
     /**

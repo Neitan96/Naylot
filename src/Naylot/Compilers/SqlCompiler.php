@@ -67,6 +67,24 @@ interface SqlCompiler{
     public function wheres(array $wheres);
 
     /**
+     * @param array $join
+     * ['Type', 'LocalRef', 'TableRef', 'ColumnRef']
+     * @param string $tableName
+     * @return string
+     */
+    public function join(array $join, $tableName = null);
+
+    /**
+     * @param array $joins
+     * [
+     *  ['Type', 'LocalRef', 'TableRef', 'ColumnRef']
+     * ]
+     * @param string $tableName
+     * @return string
+     */
+    public function joins(array $joins, $tableName = null);
+
+    /**
      * @param array|string $refereces
      * [
      *  ['Reference', ...]
@@ -76,11 +94,38 @@ interface SqlCompiler{
     public function groupBy(array $refereces);
 
     /**
+     * @param array|string $refereces
+     * [
+     *  ['Reference', 'Order']
+     * ]
+     * @return string
+     */
+    public function orderBy(array $refereces);
+
+    /**
      * @param array $limit
      * ['Take', 'Skip']
      * @return string
      */
     public function limit(array $limit);
+
+    /**
+     * @param array|string $union
+     * ['Type', 'Union']
+     * 'Union'
+     * @return string
+     */
+    public function union($union);
+
+    /**
+     * @param array|string $unions
+     * [
+     *  ['Type', 'Union']
+     *  'Union'
+     * ]
+     * @return string
+     */
+    public function unions($unions);
 
     /**
      * @param array $options
